@@ -50,17 +50,6 @@
           slurp:
             src: "~/.ssh/id_rsa.pub"
           register: ardana_pub_key
-
-        - name: Enable skip_disk_config on deployer
-          file:
-            state: "{{ item.state }}"
-            path: "{{ item.path }}"
-          loop:
-            - state: directory
-              path: "/etc/openstack"
-            - state: touch
-              path: "/etc/openstack/skip_disk_config"
-          become: yes
       rescue:
         - include_role:
             name: rocketchat_notify
@@ -142,16 +131,6 @@
             owner: ardana
             group: ardana
             mode: 0600
-
-        - name: Enable skip_disk_config on non-deployer nodes
-          file:
-            state: "{{ item.state }}"
-            path: "{{ item.path }}"
-          loop:
-            - state: directory
-              path: "/etc/openstack"
-            - state: touch
-              path: "/etc/openstack/skip_disk_config"
       rescue:
         - include_role:
             name: rocketchat_notify
