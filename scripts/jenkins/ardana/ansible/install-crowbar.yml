@@ -1,10 +1,6 @@
 ---
-- import_playbook: get-virt-ses-cluster.yml
-  when:
-    - not is_physical_deploy
-    - ses_enabled
 
-- name: Configure Crowbar and deploy OpenStack
+- name: Install Crowbar on admin node
   hosts: "{{ ardana_env }}"
   remote_user: root
   gather_facts: True
@@ -24,18 +20,32 @@
 
   tasks:
     - block:
-        - name: Crowbar log stream at
+        - name: Log stream at
           debug:
             msg: "http://{{ ansible_host }}:9091/"
 
-        - include_role:
-            name: ses_cloud_integration
-          when: ses_enabled
+        - name: Sync automation scripts onto the admin node
+          synchronize:
+            src: "{{ automation_scripts_path }}"
+            dest: "{{ admin_scripts_path }}"
+            delete: yes
+            recursive: yes
+
+        - name: Copy generated mkcloud.config to admin node
+          copy:
+            src: "{{ mkcloud_config_file }}"
+            dest: "{{ admin_mkcloud_config_file }}"
 
         - include_role:
             name: crowbar_setup
           vars:
-            qa_crowbarsetup_cmd: onadmin_batch
+            qa_crowbarsetup_cmd: "onadmin_{{ command }}"
+          loop:
+            - prepareinstallcrowbar
+            - bootstrapcrowbar
+            - installcrowbar
+          loop_control:
+            loop_var: command
       rescue:
         - include_role:
             name: rocketchat_notify

@@ -18,7 +18,7 @@
 
 - name: Run tempest and collect results
   hosts: "{{ ardana_env }}"
-  remote_user: ardana
+  remote_user: "{{ (cloud_type == 'ardana') | ternary('ardana', 'root') }}"
   gather_facts: True
   vars:
     task: "tempest"
@@ -35,6 +35,14 @@
     - block:
         - include_role:
             name: ardana_tempest
+          when: cloud_type == 'ardana'
+
+        - include_role:
+            name: crowbar_setup
+          vars:
+            qa_crowbarsetup_cmd: onadmin_testsetup
+          when: cloud_type == 'crowbar'
+
       rescue:
         - include_role:
             name: rocketchat_notify
@@ -51,6 +59,7 @@
             name: jenkins_artifacts
           vars:
             jenkins_artifacts_to_collect:
+              # For Ardana:
               - src: "~/.ansible/ansible.log"
               - src: "~/testr_results_region1.html"
                 dest: "testr_results_region1_{{ tempest_run_filter }}.html"
@@ -58,6 +67,12 @@
                 dest: "testr_results_region1_{{ tempest_run_filter }}.xml"
               - src: "/opt/stack/tempest/logs/testr_results_region1.log"
                 dest: "testr_results_region1_{{ tempest_run_filter }}.log"
+              # For Crowbar:
+              - src: "{{ admin_mkcloud_config_file }}"
+              - src: "{{ qa_crowbarsetup_log }}"
+              - src: "~/tempest.log"
+              - src: "~/tempest.subunit.log"
+
           when: lookup("env", "WORKSPACE")
 
         - include_role:
