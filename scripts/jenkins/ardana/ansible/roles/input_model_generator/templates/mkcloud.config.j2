@@ -67,6 +67,8 @@ export scenario={{ admin_scripts_path }}/scenarios/{{ scenario_file }}
 # export cinder_netapp_login=
 # export cinder_netapp_password=
 
+{% if maint_updates_list | length and not update_after_deploy %}
+export UPDATEREPOS={{ crowbar_updaterepos | join('+') }}
 {% endif %}
 # export UPDATEREPOS_UPGRADE=
 {% if extra_repos is defined and extra_repos | length > 0 != '' %}

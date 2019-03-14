@@ -66,7 +66,19 @@
     repo: "{{ local_repos_base_dir }}/{{ item.0 }}/{{ maintenance_updates_path[item.1] }}/"
     runrefresh: yes
     state: present
-  when: "maintenance_updates_path[item.1] in mu_url.results | selectattr('item', 'equalto', item.0) | map(attribute='content') | join(' ')"
+  when: "cloud_product == 'ardana' and maintenance_updates_path[item.1] in
+    mu_url.results | selectattr('item', 'equalto', item.0) |
+    map(attribute='content') | join(' ')"
   loop: "{{ maint_updates_list | product(maintenance_updates_path) | list }}"
   notify:
     - Refresh all repos
+  when: cloud_product == 'ardana'
+
+- name: build crowbar UPDATEREPOS mkcloud variable
+  set_fact:
+    crowar_updaterepos: "{{ crowbar_updaterepos +
+      [local_repos_base_dir }}/{{ item.0 }}/{{ maintenance_updates_path[item.1]/ ]}}"
+  when: "cloud_product == 'crowbar' and maintenance_updates_path[item.1] in
+    mu_url.results | selectattr('item', 'equalto', item.0) |
+    map(attribute='content') | join(' ')"
+  loop: "{{ maint_updates_list | product(maintenance_updates_path) | list }}"
