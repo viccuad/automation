@@ -43,7 +43,12 @@
             state: absent
 
         - include_role:
-            name: frontail
+            name: "{{ outer_item }}"
+          loop:
+            - setup_zypper_repos
+            - frontail
+          loop_control:
+            loop_var: outer_item
 
       rescue:
         - include_role:

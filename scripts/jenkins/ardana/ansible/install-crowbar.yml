@@ -41,7 +41,35 @@
           vars:
             qa_crowbarsetup_cmd: "onadmin_{{ command }}"
           loop:
+            - addupdaterepo
+          loop_control:
+            loop_var: command
+          when: maint_updates_list | length and not update_after_deploy
+
+        - include_role:
+            name: crowbar_setup
+          vars:
+            qa_crowbarsetup_cmd: "onadmin_{{ command }}"
+          loop:
             - prepareinstallcrowbar
+          loop_control:
+            loop_var: command
+
+        - include_role:
+            name: crowbar_setup
+          vars:
+            qa_crowbarsetup_cmd: "onadmin_{{ command }}"
+          loop:
+            - runupdate
+          loop_control:
+            loop_var: command
+          when: maint_updates_list | length and not update_after_deploy
+
+        - include_role:
+            name: crowbar_setup
+          vars:
+            qa_crowbarsetup_cmd: "onadmin_{{ command }}"
+          loop:
             - bootstrapcrowbar
             - installcrowbar
           loop_control:

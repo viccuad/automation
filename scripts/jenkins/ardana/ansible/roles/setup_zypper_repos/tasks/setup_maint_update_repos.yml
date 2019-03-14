@@ -76,9 +76,18 @@
 
 - name: build crowbar UPDATEREPOS mkcloud variable
   set_fact:
-    crowar_updaterepos: "{{ crowbar_updaterepos +
+    crowbar_updaterepos: "{{ crowbar_updaterepos +
       [local_repos_base_dir }}/{{ item.0 }}/{{ maintenance_updates_path[item.1]/ ]}}"
   when: "cloud_product == 'crowbar' and maintenance_updates_path[item.1] in
     mu_url.results | selectattr('item', 'equalto', item.0) |
     map(attribute='content') | join(' ')"
   loop: "{{ maint_updates_list | product(maintenance_updates_path) | list }}"
+
+- name: insert crowbar_updaterepos variable to mkcloud
+  blockinfile:
+    path: "{{ mkcloud_config_file }}"
+    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
+    content: |
+      export UPDATEREPOS={{ crowbar_updaterepos | join('+') }}
+    when: "cloud_product == 'crowbar' and maint_updates_list |
+      length and not update_after_deploy"
