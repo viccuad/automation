@@ -67,11 +67,11 @@ export scenario={{ admin_scripts_path }}/scenarios/{{ scenario_file }}
 # export cinder_netapp_login=
 # export cinder_netapp_password=
 
-{% if extra_repos is defined and extra_repos | length > 0 != '' %}
-export UPDATEREPOS={{ extra_repos.split(',') | join('+') }}
 {% endif %}
 # export UPDATEREPOS_UPGRADE=
-# export UPDATEREPOS_EXTRA=
+{% if extra_repos is defined and extra_repos | length > 0 != '' %}
+export UPDATEREPOS_EXTRA={{ extra_repos.split(',') | join('+') }}
+{% endif %}
 # export NOINSTALLCLOUDPATTERN=
 
 # export clouddescription=
