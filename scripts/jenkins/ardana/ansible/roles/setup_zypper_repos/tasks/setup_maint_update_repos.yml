@@ -66,9 +66,7 @@
     repo: "{{ local_repos_base_dir }}/{{ item.0 }}/{{ maintenance_updates_path[item.1] }}/"
     runrefresh: yes
     state: present
-  when: "cloud_product == 'ardana' and maintenance_updates_path[item.1] in
-    mu_url.results | selectattr('item', 'equalto', item.0) |
-    map(attribute='content') | join(' ')"
+  when: "cloud_product == 'ardana' and maintenance_updates_path[item.1] in mu_url.results | selectattr('item', 'equalto', item.0) | map(attribute='content') | join(' ')"
   loop: "{{ maint_updates_list | product(maintenance_updates_path) | list }}"
   notify:
     - Refresh all repos
@@ -76,11 +74,10 @@
 
 - name: build crowbar UPDATEREPOS mkcloud variable
   set_fact:
+    # this is using local_repos_base_dir. Do we want to rsync???
     crowbar_updaterepos: "{{ crowbar_updaterepos +
       [local_repos_base_dir }}/{{ item.0 }}/{{ maintenance_updates_path[item.1]/ ]}}"
-  when: "cloud_product == 'crowbar' and maintenance_updates_path[item.1] in
-    mu_url.results | selectattr('item', 'equalto', item.0) |
-    map(attribute='content') | join(' ')"
+  when: "cloud_product == 'crowbar' and maintenance_updates_path[item.1] in mu_url.results | selectattr('item', 'equalto', item.0) | map(attribute='content') | join(' ')"
   loop: "{{ maint_updates_list | product(maintenance_updates_path) | list }}"
 
 - name: insert crowbar_updaterepos variable to mkcloud
